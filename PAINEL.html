@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    function mostrarSecao(secao) {
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('produtos').classList.add('hidden');
+      document.getElementById(secao).classList.remove('hidden');
+      location.hash = secao;
+    }
+
+    function logout() {
+      window.location.href = 'login.html';
+    }
+
+    window.onload = () => {
+      const hash = location.hash.replace('#', '') || 'dashboard';
+      mostrarSecao(hash);
+      lucide.createIcons();
+    };
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="flex min-h-screen">
+    <aside class="w-64 bg-blue-800 text-white p-6 space-y-4">
+      <h2 class="text-2xl font-bold mb-6">Painel</h2>
+      <ul class="space-y-2">
+        <li>
+          <button onclick="mostrarSecao('dashboard')" class="flex items-center gap-2 w-full text-left hover:bg-blue-700 p-2 rounded">
+            <i data-lucide="layout-dashboard"></i> Dashboard
+          </button>
+        </li>
+        <li>
+          <button onclick="mostrarSecao('produtos')" class="flex items-center gap-2 w-full text-left hover:bg-blue-700 p-2 rounded">
+            <i data-lucide="package"></i> Produtos
+          </button>
+        </li>
+      </ul>
+      <button onclick="logout()" class="mt-10 text-sm text-white underline hover:text-gray-300">Sair</button>
+    </aside>
+
+    <main class="flex-1 p-8">
+      <header class="mb-8">
+        <h1 class="text-3xl font-semibold text-blue-800">Gerenciamento de Action Figures</h1>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="bg-white rounded-lg shadow p-6 hidden">
+        <h2 class="text-xl font-semibold mb-4">Dashboard</h2>
+        <p class="text-gray-700">Bem-vindo ao sistema de gerenciamento de produtos!</p>
+      </section>
+
+      <!-- PRODUTOS -->
+      <section id="produtos" class="bg-white rounded-lg shadow p-6 hidden">
+        <div class="mb-6">
+          <h2 id="form-title" class="text-xl font-semibold mb-4">Adicionar Produto</h2>
+          <input type="hidden" id="editIndex" value="">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <input type="text" id="nome" placeholder="Nome do Produto" class="border p-2 rounded" required>
+            <input type="text" id="categoria" placeholder="Categoria" class="border p-2 rounded" required>
+            <input type="number" id="preco" placeholder="Preço" class="border p-2 rounded" required>
+            <input type="number" id="estoque" placeholder="Estoque" class="border p-2 rounded" required>
+            <input type="file" id="uploadImagem" accept="image/*" class="border p-2 rounded">
+          </div>
+          <button onclick="salvarProduto()" class="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Salvar</button>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Produtos</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full table-auto border-collapse">
+              <thead class="bg-blue-800 text-white">
+                <tr>
+                  <th class="p-2 text-left">Imagem</th>
+                  <th class="p-2 text-left">Nome</th>
+                  <th class="p-2 text-left">Categoria</th>
+                  <th class="p-2 text-left">Preço</th>
+                  <th class="p-2 text-left">Estoque</th>
+                  <th class="p-2 text-left">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela" class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const produtos = [];
+
+    function salvarProduto() {
+      const nome = document.getElementById('nome').value;
+      const categoria = document.getElementById('categoria').value;
+      const preco = document.getElementById('preco').value;
+      const estoque = document.getElementById('estoque').value;
+      const imagemInput = document.getElementById('uploadImagem');
+      const imagemURL = imagemInput.files[0] ? URL.createObjectURL(imagemInput.files[0]) : '';
+
+      produtos.push({ nome, categoria, preco, estoque, imagem: imagemURL });
+      atualizarTabela();
+    }
+
+    function atualizarTabela() {
+      const tabela = document.getElementById('tabela');
+      tabela.innerHTML = '';
+
+      produtos.forEach((p, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="p-2"><img src="${p.imagem}" alt="Imagem" class="w-16 h-16 object-cover rounded"></td>
+          <td class="p-2">${p.nome}</td>
+          <td class="p-2">${p.categoria}</td>
+          <td class="p-2">R$ ${parseFloat(p.preco).toFixed(2)}</td>
+          <td class="p-2">${p.estoque}</td>
+          <td class="p-2"><button onclick="removerProduto(${index})" class="text-red-500 hover:underline">Excluir</button></td>
+        `;
+        tabela.appendChild(row);
+      });
+    }
+
+    function removerProduto(index) {
+      produtos.splice(index, 1);
+      atualizarTabela();
+    }
+  </script>
+</body>
+</html>

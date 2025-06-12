@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FigureGate - Loja</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-600 to-indigo-700 min-h-screen text-gray-800">
+
+  <header class="bg-white shadow p-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-indigo-700">FigureGate</h1>
+    <nav class="flex gap-6">
+      <a href="vendas.html" class="text-indigo-600 hover:text-indigo-800 font-semibold">Loja</a>
+      <a href="login.html" class="text-indigo-600 hover:text-indigo-800 font-semibold">Painel</a>
+    </nav>
+  </header>
+
+  <section class="bg-white shadow rounded-lg max-w-4xl mx-auto mt-6 p-4">
+    <h2 class="text-xl font-semibold mb-4 text-indigo-700">Carrinho de Compras</h2>
+    <div id="carrinho" class="space-y-2"></div>
+    <div id="total" class="mt-4 font-bold text-right text-lg text-indigo-800"></div>
+    <button onclick="finalizarCompra()" class="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">Finalizar Compra</button>
+  </section>
+
+  <main class="max-w-7xl mx-auto p-6">
+    <h2 class="text-2xl font-semibold mb-6 text-white">Catálogo</h2>
+    <div id="produtosGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></div>
+  </main>
+
+  <script>
+    const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+    const produtosGrid = document.getElementById('produtosGrid');
+    const carrinho = [];
+    const carrinhoDiv = document.getElementById('carrinho');
+    const totalDiv = document.getElementById('total');
+
+    function atualizarCarrinho() {
+      carrinhoDiv.innerHTML = '';
+      let total = 0;
+
+      if (carrinho.length === 0) {
+        carrinhoDiv.innerHTML = '<p class="text-gray-500">Nenhum item no carrinho.</p>';
+        totalDiv.textContent = '';
+        return;
+      }
+
+      carrinho.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center border-b pb-2';
+        div.innerHTML = `
+          <span>${item.nome}</span>
+          <span class="font-bold text-orange-600">R$ ${item.preco.toFixed(2)}</span>
+        `;
+        carrinhoDiv.appendChild(div);
+        total += item.preco;
+      });
+
+      totalDiv.textContent = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function adicionarAoCarrinho(produto) {
+      carrinho.push(produto);
+      atualizarCarrinho();
+    }
+
+    function finalizarCompra() {
+      if (carrinho.length === 0) {
+        alert("Seu carrinho está vazio!");
+        return;
+      }
+      alert("Compra finalizada com sucesso!");
+      carrinho.length = 0;
+      atualizarCarrinho();
+    }
+
+    if (produtos.length === 0) {
+      produtosGrid.innerHTML = `<p class="text-white col-span-full text-center">Nenhum produto disponível no momento.</p>`;
+    } else {
+      produtos.forEach(produto => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-lg shadow p-4 flex flex-col";
+
+        const img = document.createElement('img');
+        img.src = produto.imagem || 'https://via.placeholder.com/300x300?text=Sem+Imagem';
+        img.alt = produto.nome;
+        img.className = "w-full h-48 object-cover rounded mb-4";
+
+        const nome = document.createElement('h3');
+        nome.textContent = produto.nome;
+        nome.className = "text-lg font-semibold mb-2";
+
+        const categoria = document.createElement('p');
+        categoria.textContent = `Categoria: ${produto.categoria}`;
+        categoria.className = "text-gray-600 mb-1";
+
+        const preco = document.createElement('p');
+        preco.textContent = `R$ ${parseFloat(produto.preco).toFixed(2)}`;
+        preco.className = "text-orange-500 font-bold mb-4";
+
+        const botao = document.createElement('button');
+        botao.textContent = "Adicionar ao Carrinho";
+        botao.className = "mt-auto bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition";
+        botao.onclick = () => adicionarAoCarrinho(produto);
+
+        card.appendChild(img);
+        card.appendChild(nome);
+        card.appendChild(categoria);
+        card.appendChild(preco);
+        card.appendChild(botao);
+
+        produtosGrid.appendChild(card);
+      });
+    }
+
+    atualizarCarrinho();
+  </script>
+</body>
+</html>
